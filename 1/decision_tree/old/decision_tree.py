@@ -244,3 +244,4 @@ class DecisionTree:
     #             stack.append(node.right)
     #             print(stack)
     #             split += -1
+#%%
