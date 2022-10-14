@@ -26,22 +26,24 @@ class DecisionTree:
         else:
             s = f'Tree with max fitted depth of {self.fitted_depth}:\n'
             s += f'root ::: Split at variable {self.root.variable} at {self.root.threshold}\n'
-            stack = ['left', 'right']
-            while stack:
-                name = stack.pop()
-                curr_depth = name.count('.') + 2
-                if cm.attrgetter(self.root, f'{name}.variable'):
-                    s += f"{' ' * curr_depth}{name} ::: Split at variable {cm.attrgetter(self.root, f'{name}.variable')} at " \
-                         f"{cm.attrgetter(self.root, f'{name}.threshold')} (" \
-                         f"{np.unique(cm.attrgetter(self.root, f'{name}.target'), return_counts=True)[1]})\n"
-                else:
-                    s += f"{' ' * curr_depth}{name} ({np.unique(cm.attrgetter(self.root, f'{name}.target'), return_counts=True)[1]}" \
-                         f" and the leaf value is {cm.attrgetter(self.root, f'{name}.leaf_value')})\n"
-                if cm.attrgetter(self.root, f'{name}.left'):
-                    stack.append(f'{name}.left')
-                if cm.attrgetter(self.root, f'{name}.right'):
-                    stack.append(f'{name}.right')
+            s = self.prepString('right', s)
+            s = self.prepString('left', s)
             return s
+
+    def prepString(self, name, s):
+        curr_depth = name.count('.') + 2
+        if cm.attrgetter(self.root, f'{name}.variable'):
+            s += f"{' ' * curr_depth}{name} ::: Split at variable {cm.attrgetter(self.root, f'{name}.variable')} at " \
+                 f"{cm.attrgetter(self.root, f'{name}.threshold')} (" \
+                 f"{np.unique(cm.attrgetter(self.root, f'{name}.target'), return_counts=True)[1]})\n"
+        else:
+            s += f"{' ' * curr_depth}{name} ({np.unique(cm.attrgetter(self.root, f'{name}.target'), return_counts=True)[1]}" \
+                 f" and the leaf value is {cm.attrgetter(self.root, f'{name}.leaf_value')})\n"
+        if cm.attrgetter(self.root, f'{name}.right'):
+            s = self.prepString(f'{name}.right', s)
+        if cm.attrgetter(self.root, f'{name}.left'):
+            s = self.prepString(f'{name}.left', s)
+        return s
 
     @staticmethod
     def entropy(x: np.ndarray) -> float:
@@ -160,3 +162,5 @@ class DecisionTree:
         :return: list with predicted classes
         """
         return [self.get_prediction(x) for x in new_data]
+
+#%%
